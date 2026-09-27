@@ -1,8 +1,4 @@
 <script setup>
-import { ref } from 'vue'
-
-const serverIp = 'mc.example.com'
-
 const heroImage =
   'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dark%20fantasy%20minecraft%20style%20game%20key%20art%3A%20floating%20glowing%20purple%20magic%20runes%20and%20spell%20circles%20in%20a%20misty%20night%20forest%2C%20deep%20violet%20and%20cyan%20lighting%2C%20cinematic%20wide%20shot%2C%20highly%20detailed%2C%20atmospheric&image_size=landscape_16_9'
 
@@ -61,47 +57,10 @@ const gameplayPoints = [
 ]
 
 const serverMeta = [
-  { label: '支持版本', value: 'Java 版 1.20 及以上' },
-  { label: '玩法模式', value: '魔法生存 · RPG · 团队副本' },
-  { label: '登录方式', value: '复制地址后直接进入' },
+  { label: '支持版本', value: '即将推出' },
+  { label: '玩法模式', value: '即将推出' },
+  { label: '登录方式', value: '即将推出' },
 ]
-
-const copied = ref(false)
-let copiedTimer
-
-async function writeToClipboard(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    try {
-      await navigator.clipboard.writeText(text)
-      return true
-    } catch {
-      // 继续尝试兜底方案
-    }
-  }
-
-  // 非安全上下文（如纯 HTTP 部署）或剪贴板 API 不可用时的兜底方案
-  const input = document.createElement('textarea')
-  input.value = text
-  input.setAttribute('readonly', '')
-  input.style.position = 'fixed'
-  input.style.opacity = '0'
-  document.body.appendChild(input)
-  input.select()
-  const succeeded = document.execCommand('copy')
-  document.body.removeChild(input)
-  return succeeded
-}
-
-async function copyServerIp() {
-  const succeeded = await writeToClipboard(serverIp)
-  if (!succeeded) return
-
-  copied.value = true
-  clearTimeout(copiedTimer)
-  copiedTimer = setTimeout(() => {
-    copied.value = false
-  }, 2000)
-}
 </script>
 
 <template>
@@ -256,17 +215,14 @@ async function copyServerIp() {
       <div class="container">
         <header class="section-head">
           <span class="eyebrow">服务器信息</span>
-          <h2>加入香草猫娘的世界</h2>
-          <p class="section-desc">复制服务器地址，启动 Minecraft，即可进入这个充满魔法的方块世界。</p>
+          <h2>香草猫娘即将开放</h2>
+          <p class="section-desc">服务器正在筹备中，开服时间与连接方式将在本站与社区同步公布。</p>
         </header>
 
         <div class="server-card">
           <div class="server-address">
             <span class="server-label">服务器地址</span>
-            <code class="server-ip">{{ serverIp }}</code>
-            <button class="btn btn-primary btn-sm" type="button" @click="copyServerIp">
-              {{ copied ? '已复制' : '复制地址' }}
-            </button>
+            <span class="server-pending">即将推出</span>
           </div>
 
           <ul class="server-meta">
@@ -276,9 +232,7 @@ async function copyServerIp() {
             </li>
           </ul>
 
-          <p class="server-note">
-            在 Minecraft Java 版客户端中选择「多人游戏 → 添加服务器」，粘贴地址后即可进入。
-          </p>
+          <p class="server-note">开服前本站会更新服务器地址与进入方式，敬请期待。</p>
         </div>
       </div>
     </section>
@@ -291,10 +245,8 @@ async function copyServerIp() {
             无论是初入魔法之门的新人，还是追寻禁咒的资深法师，香草猫娘都为你留好了位置。
           </p>
           <div class="hero-actions">
-            <button class="btn btn-primary" type="button" @click="copyServerIp">
-              {{ copied ? '地址已复制，快去启动游戏吧' : '复制服务器地址' }}
-            </button>
-            <a class="btn btn-ghost" href="#features">查看玩法特色</a>
+            <a class="btn btn-primary" href="#features">查看玩法特色</a>
+            <a class="btn btn-ghost" href="#gameplay">了解魔法玩法</a>
           </div>
         </div>
       </div>
@@ -766,14 +718,14 @@ async function copyServerIp() {
   letter-spacing: 0.06em;
 }
 
-.server-ip {
-  color: #fff;
-  font-size: clamp(18px, 2.4vw, 26px);
-  letter-spacing: 0.04em;
-}
-
-.server-address .btn {
-  margin-left: auto;
+.server-pending {
+  padding: 6px 20px;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: #dcc9ff;
+  font-size: clamp(16px, 2vw, 21px);
+  letter-spacing: 0.16em;
 }
 
 .server-meta {
@@ -930,10 +882,6 @@ async function copyServerIp() {
 
   .footer-links {
     justify-content: flex-start;
-  }
-
-  .server-address .btn {
-    margin-left: 0;
   }
 }
 
