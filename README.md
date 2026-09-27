@@ -28,6 +28,23 @@ npm run build
 npm run preview
 ```
 
+## Docker 部署
+
+镜像采用多阶段构建：先在 Node 环境中执行 `npm ci && npm run build`，再由 Nginx 托管 `dist/` 静态产物（已配置单页应用回退、gzip 压缩与静态资源长效缓存）。
+
+```bash
+# 构建镜像
+docker build -t website .
+
+# 启动容器，映射到本机 8080 端口
+docker run -d --name website -p 8080:80 website
+
+# 停止并移除容器
+docker stop website && docker rm website
+```
+
+启动后访问 http://localhost:8080 即可。如需修改端口映射、缓存策略或 gzip 规则，编辑 [nginx.conf](nginx.conf) 后重新构建镜像。
+
 ## 目录结构
 
 ```
@@ -41,6 +58,9 @@ website/
 │  └─ style.css         # 全局样式
 ├─ index.html           # HTML 入口
 ├─ vite.config.js       # Vite 配置
+├─ Dockerfile           # 多阶段构建：Node 构建 + Nginx 托管
+├─ nginx.conf           # Nginx 站点配置（SPA 回退、gzip、静态资源缓存）
+├─ .dockerignore        # 构建镜像时忽略的文件
 └─ package.json
 ```
 
