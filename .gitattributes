@@ -1,0 +1,3 @@
+# 保证容器内使用的配置文件始终为 LF 换行
+Dockerfile text eol=lf
+nginx.conf text eol=lf
