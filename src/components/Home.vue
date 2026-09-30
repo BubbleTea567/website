@@ -499,7 +499,7 @@ onBeforeUnmount(() => {
   z-index: 50;
   background: rgba(6, 6, 11, 0.72);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border-soft);
+  /* 去掉底部实线，改由滚动进度条与文字高亮提示位置 */
 }
 
 .nav-inner {
@@ -509,15 +509,19 @@ onBeforeUnmount(() => {
   height: 68px;
 }
 
-/* 顶部滚动进度光条 */
+/* 顶部滚动进度光条（已降调：1px、无发光，避免成为一条突兀的亮紫边） */
 .nav-progress {
   position: absolute;
-  inset: auto 0 -1px;
-  height: 2px;
+  inset: auto 0 0;
+  height: 1px;
   transform: scaleX(0);
   transform-origin: left center;
-  background: linear-gradient(90deg, #7c3aed, #c084fc 45%, var(--accent));
-  box-shadow: 0 0 14px rgba(168, 85, 247, 0.9);
+  background: linear-gradient(
+    90deg,
+    rgba(124, 58, 237, 0.5),
+    rgba(196, 132, 252, 0.75) 45%,
+    rgba(34, 211, 238, 0.5)
+  );
   pointer-events: none;
 }
 
@@ -632,16 +636,22 @@ onBeforeUnmount(() => {
   left: 118%;
 }
 
+/*
+ * 白字对比度：原 #a855f7 → #7c3aed 的最亮端仅 3.96:1，未达 WCAG AA（4.5:1）。
+ * 整体压深一档为 #9333ea → #6d28d9 后：
+ *   最亮端 5.38:1、最深端 7.10:1，全按钮区间均 ≥ AA，较深一半达 AAA（7:1）。
+ */
 .btn-primary {
-  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  background: linear-gradient(135deg, #9333ea, #6d28d9);
   color: #fff;
   box-shadow: 0 12px 32px -14px rgba(168, 85, 247, 0.9);
 }
 
-/* 悬停：整体提亮 + 明显的紫色外发光 */
+/* 悬停：整体提亮 + 明显的紫色外发光
+   （提亮系数从 1.16 收到 1.10，否则悬停时最亮端会掉到 4.37:1、重新跌破 AA） */
 .btn-primary:hover {
   transform: translateY(-2px);
-  filter: brightness(1.16) saturate(1.05);
+  filter: brightness(1.1) saturate(1.05);
   box-shadow:
     0 18px 38px -12px rgba(168, 85, 247, 1),
     0 0 28px rgba(168, 85, 247, 0.7);
@@ -687,6 +697,10 @@ onBeforeUnmount(() => {
   background-size: cover;
   background-position: center;
   opacity: 0.55;
+  /* 底部把背景图淡出：首屏底边的切线其实来自背景图被 overflow 硬裁，
+     而不是 border 或实色背景，所以要在图上做遮罩 */
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
 }
 
 .hero-overlay {
@@ -698,7 +712,10 @@ onBeforeUnmount(() => {
       180deg,
       rgba(6, 6, 11, 0.55) 0%,
       rgba(6, 6, 11, 0.78) 55%,
-      rgba(6, 6, 11, 0.9) 100%
+      /* 85.4% = 首屏统计数据块的下沿，暗角在此之前保持全强度 */
+      rgba(6, 6, 11, 0.8) 85.4%,
+      /* 底边归零，与下方区块的 body 背景严丝合缝，消除横向色阶跳变 */
+      rgba(6, 6, 11, 0) 100%
     );
 }
 
@@ -722,6 +739,13 @@ onBeforeUnmount(() => {
   height: 118%;
   filter: blur(64px);
   opacity: 0.72;
+  /*
+   * 底部淡出：本容器比首屏高出 42px，模糊后的粉色光晕会在首屏底边被
+   * overflow 硬切（实测 residual alpha ≈ 0.11）。首屏底边位于本容器
+   * 94.9% 高度处，故在 76%→95% 之间把光晕收掉，出界前已归零。
+   */
+  -webkit-mask-image: linear-gradient(180deg, #000 76%, transparent 95%);
+  mask-image: linear-gradient(180deg, #000 76%, transparent 95%);
   pointer-events: none;
 }
 
@@ -913,12 +937,14 @@ onBeforeUnmount(() => {
 }
 
 .section-alt {
-  border-block: 1px solid var(--border-soft);
+  /* 去掉横贯整屏的两条切割线，改由上下渐隐的光带区分区块。
+     紫光强度减半（0.06 → 0.03）：卡片改为「更暗的磨砂面板」后，
+     区块这层紫光只需提供方向感，过浓会和卡片叠色显脏。 */
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(168, 85, 247, 0.06) 30%,
-    rgba(168, 85, 247, 0.06) 70%,
+    rgba(168, 85, 247, 0.03) 30%,
+    rgba(168, 85, 247, 0.03) 70%,
     transparent
   );
 }
@@ -964,11 +990,17 @@ onBeforeUnmount(() => {
 
 .feature-card {
   padding: 32px 28px;
-  border: 1px solid var(--border);
+  /* 描边降到几乎不可见，只留一丝轮廓 */
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 18px;
-  background: rgba(138, 43, 226, 0.1);
-  /* 顶部内高光，让卡片有“厚度” */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  /* 比区块「更深」：靠暗度分层，而不是把紫色叠在区块的紫色之上（会串色显脏） */
+  background: rgba(5, 5, 12, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* 顶部内高光 + 大范围低透明度外发光 */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 48px 4px rgba(138, 43, 226, 0.06);
   transition:
     transform 0.3s ease,
     background-color 0.3s ease,
@@ -976,13 +1008,15 @@ onBeforeUnmount(() => {
     box-shadow 0.3s ease;
 }
 
+/* 边界「按需出现」：静止态柔和，悬停时才点亮轮廓 */
 .feature-card:hover {
   transform: translateY(-6px);
-  background: rgba(138, 43, 226, 0.17);
-  border-color: rgba(196, 150, 255, 0.5);
+  border-color: rgba(196, 150, 255, 0.45);
+  /* 悬停保持同一套「深色面板」语言，只微微提亮；若改成紫色会破坏深浅分层 */
+  background-color: rgba(24, 20, 42, 0.6);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 26px 54px -32px rgba(168, 85, 247, 0.95);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 26px 54px -32px rgba(168, 85, 247, 0.9);
 }
 
 .feature-icon {
@@ -1161,14 +1195,14 @@ onBeforeUnmount(() => {
   display: grid;
   gap: 28px;
   padding: clamp(32px, 4.5vw, 52px);
-  border: 1px solid var(--border);
+  /* 按先前的明确要求保持无描边，靠暗度与柔光界定范围 */
+  border: none;
   border-radius: 24px;
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(168, 85, 247, 0.18), transparent 55%),
-    rgba(138, 43, 226, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 34px 70px -50px rgba(0, 0, 0, 0.95);
+  /* 与另两张卡片统一为「更暗的磨砂面板」 */
+  background: rgba(5, 5, 12, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 80px 20px rgba(138, 43, 226, 0.05);
 }
 
 .server-address {
@@ -1176,8 +1210,7 @@ onBeforeUnmount(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 14px 20px;
-  padding-bottom: 26px;
-  border-bottom: 1px solid var(--border-soft);
+  /* 内部横线已去掉，同时收掉原来为它留的下边距，避免留下空洞 */
 }
 
 .server-label {
@@ -1244,12 +1277,14 @@ onBeforeUnmount(() => {
 /* ---------- 行动号召 ---------- */
 .cta-inner {
   padding: clamp(48px, 7vw, 80px) clamp(24px, 4vw, 60px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 28px;
   text-align: center;
-  background:
-    radial-gradient(90% 120% at 50% 0%, rgba(168, 85, 247, 0.24), transparent 62%),
-    rgba(255, 255, 255, 0.02);
+  /* 与另两张卡片统一为「更暗的磨砂面板」 */
+  background: rgba(5, 5, 12, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 80px 10px rgba(138, 43, 226, 0.06);
 }
 
 .cta-inner .section-desc {
@@ -1260,8 +1295,13 @@ onBeforeUnmount(() => {
 /* ---------- 页脚 ---------- */
 .footer {
   padding: 64px 0 40px;
-  border-top: 1px solid var(--border-soft);
-  background: #05050a;
+  /* 去掉顶线与实色底：改为由上到下渐深的半透明遮罩，与页面光晕自然衔接 */
+  background: linear-gradient(
+    180deg,
+    rgba(5, 5, 10, 0) 0%,
+    rgba(5, 5, 10, 0.55) 40%,
+    rgba(5, 5, 10, 0.9) 100%
+  );
 }
 
 .footer-inner {
@@ -1338,8 +1378,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 10px;
   margin-top: 40px;
-  padding-top: 22px;
-  border-top: 1px solid var(--border-soft);
+  /* 内部横线已去掉，收掉为它留的上边距 */
   color: var(--text-muted);
   font-size: 13px;
 }
@@ -1501,13 +1540,6 @@ onBeforeUnmount(() => {
 }
 
 /* ---------- 响应式 ---------- */
-@media (min-width: 640px) {
-  .hero-stats li + li {
-    padding-left: clamp(24px, 4vw, 60px);
-    border-left: 1px solid var(--border-soft);
-  }
-}
-
 @media (max-width: 1024px) {
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1545,6 +1577,16 @@ onBeforeUnmount(() => {
 @media (max-width: 760px) {
   .server-meta {
     grid-template-columns: 1fr;
+  }
+
+  /* 小屏关掉卡片的 backdrop-filter：背景的粒子层在持续动画，
+     6 个模糊区域要逐帧重算，手机上纯属白耗性能，而磨砂质感在小屏上肉眼也分辨不出。
+     卡片底色不变，视觉上几乎无差别。 */
+  .feature-card,
+  .server-card,
+  .cta-inner {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
