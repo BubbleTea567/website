@@ -1,9 +1,6 @@
 <script setup>
-const heroImage =
-  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dark%20fantasy%20minecraft%20style%20game%20key%20art%3A%20floating%20glowing%20purple%20magic%20runes%20and%20spell%20circles%20in%20a%20misty%20night%20forest%2C%20deep%20violet%20and%20cyan%20lighting%2C%20cinematic%20wide%20shot%2C%20highly%20detailed%2C%20atmospheric&image_size=landscape_16_9'
-
-const gameplayImage =
-  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=minecraft%20style%20wizard%20tower%20interior%20with%20glowing%20enchanted%20bookshelves%2C%20floating%20purple%20magic%20particles%2C%20arcane%20circle%20on%20the%20stone%20floor%2C%20dark%20cozy%20fantasy%20lighting%2C%20game%20screenshot%20style%2C%20highly%20detailed&image_size=landscape_4_3'
+import gameplayImage from '../assets/gameplay.jpg'
+import heroImage from '../assets/hero.jpg'
 
 const navLinks = [
   { label: '玩法特色', href: '#features' },
