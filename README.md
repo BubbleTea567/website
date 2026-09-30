@@ -45,11 +45,31 @@ docker stop website && docker rm website
 
 启动后访问 http://localhost:8080 即可。如需修改端口映射、缓存策略或 gzip 规则，编辑 [nginx.conf](nginx.conf) 后重新构建镜像。
 
+## 部署到 Cloudflare Workers
+
+以 Workers 静态资源（Static Assets）方式托管：`vite build` 产物目录 `dist/` 直接作为 assets 上传，无需编写 Worker 脚本，配置见 [wrangler.jsonc](wrangler.jsonc)。
+
+- `not_found_handling: "single-page-application"`：未命中静态文件时回退到 `index.html`，等价于 Nginx 的 `try_files` 回退
+- [public/_headers](public/_headers)：为哈希产物设置长期缓存，HTML 入口每次回源校验
+
+```bash
+# 首次使用需登录 Cloudflare 账号（浏览器授权）
+npx wrangler login
+
+# 本地预演：构建后用 Wrangler 本地运行时提供站点
+npm run cf:dev
+
+# 构建并部署
+npm run deploy
+```
+
+部署完成后会输出访问地址（默认为 `https://website.<你的子域>.workers.dev`）。如需绑定自定义域名，在 Cloudflare 控制台的 Workers 项目中添加 Custom Domain 即可。
+
 ## 目录结构
 
 ```
 website/
-├─ public/              # 静态资源，原样拷贝到构建产物根目录
+├─ public/              # 静态资源，原样拷贝到构建产物根目录（含 _headers 缓存规则）
 ├─ src/
 │  ├─ assets/           # 需要被构建处理的资源（图片、样式等）
 │  ├─ components/       # 通用组件
@@ -60,6 +80,7 @@ website/
 ├─ vite.config.js       # Vite 配置
 ├─ Dockerfile           # 多阶段构建：Node 构建 + Nginx 托管
 ├─ nginx.conf           # Nginx 站点配置（SPA 回退、gzip、静态资源缓存）
+├─ wrangler.jsonc       # Cloudflare Workers 部署配置（静态资源 + SPA 回退）
 ├─ .dockerignore        # 构建镜像时忽略的文件
 └─ package.json
 ```
